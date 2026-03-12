@@ -42,5 +42,3 @@ jobs:
       contents: write
       attestations: write
       id-token: write
-    secrets:
-      BCR_PUBLISH_TOKEN: ${{ secrets.BCR_PUBLISH_TOKEN }}
