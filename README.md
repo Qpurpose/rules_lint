@@ -49,6 +49,7 @@ Linters which are not language-specific:
 | Markdown               | [Prettier]                | [Vale]                                     |
 | Protocol Buffer        | [buf]                     | [buf lint]                                 |
 | Python                 | [ruff]                    | [bandit], [flake8], [pylint], [ruff], [ty] |
+| QML                    | [qmlformat]               | [qmllint]                                  |
 | Ruby                   |                           | [RuboCop], [Standard]                      |
 | Rust                   | [rustfmt]                 | [clippy]                                   |
 | SQL                    | [prettier-plugin-sql]     |                                            |
@@ -91,6 +92,8 @@ Linters which are not language-specific:
 [ruff]: https://docs.astral.sh/ruff/
 [ty]: https://docs.astral.sh/ty/
 [pylint]: https://pylint.readthedocs.io/en/stable/
+[qmlformat]: https://doc.qt.io/qt-6/qtqml-tooling-qmlformat.html
+[qmllint]: https://doc.qt.io/qt-6/qtqml-tooling-qmllint.html
 [shellcheck]: https://www.shellcheck.net/
 [shfmt]: https://github.com/mvdan/sh
 [taplo]: https://taplo.tamasfe.dev/

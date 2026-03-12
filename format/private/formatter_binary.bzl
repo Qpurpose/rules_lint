@@ -12,6 +12,7 @@ TOOLS = {
     "GraphQL": "prettier",
     "HTML": "prettier",
     "Python": "ruff",
+    "QML": "qmlformat",
     "Starlark": "buildifier",
     "Jsonnet": "jsonnetfmt",
     "Terraform": "terraform-fmt",
@@ -54,6 +55,7 @@ CHECK_FLAGS = {
     "swiftformat": "--lint",
     "prettier": "--check --log-level=warn",
     "ruff": "format --check --force-exclude --diff",
+    "qmlformat": "",
     "shfmt": "--diff --apply-ignore",
     "java-format": "--set-exit-if-changed --dry-run",
     "djlint": "--format-css --format-js --check",
@@ -82,6 +84,7 @@ FIX_FLAGS = {
     # as command-line arguments; see
     # https://github.com/astral-sh/ruff/discussions/5857#discussioncomment-6583943
     "ruff": "format --force-exclude",
+    "qmlformat": "--inplace",
     # NB: apply-ignore added in https://github.com/mvdan/sh/issues/1037
     "shfmt": "-w --apply-ignore",
     "java-format": "--replace",
@@ -103,6 +106,14 @@ FIX_FLAGS = {
 }
 
 def to_attribute_name(lang):
+    """Convert a language name to the corresponding attribute name in the formatter rule.
+
+    Args:
+        lang: The human-readable language name, e.g. "C++" or "F#".
+
+    Returns:
+        The corresponding attribute name in the formatter rule.
+    """
     if lang == "C++":
         return "cc"
     if lang == "C#":
