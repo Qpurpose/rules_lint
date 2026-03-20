@@ -153,9 +153,16 @@ def _ruff_aspect_impl(target, ctx):
         patch = getattr(outputs, "patch", None),
     )
 
-    # TODO(alex): if we run with --fix, this will report the issues that were fixed. Does a machine reader want to know about them?
     raw_machine_report = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = _MNEMONIC, suffix = "raw_machine_report"))
-    ruff_action(ctx, ctx.executable._ruff, files_to_lint, ctx.files._config_files, raw_machine_report, outputs.machine.exit_code)
+    ruff_action(
+        ctx,
+        ctx.executable._ruff,
+        files_to_lint,
+        ctx.files._config_files,
+        raw_machine_report,
+        outputs.machine.exit_code,
+        patch = getattr(outputs, "patch", None),
+    )
 
     # Ideally we'd just use {"RUFF_OUTPUT_FORMAT": "sarif"} however it prints absolute paths; see https://github.com/astral-sh/ruff/issues/14985
     parse_to_sarif_action(ctx, _MNEMONIC, raw_machine_report, outputs.machine.out)
