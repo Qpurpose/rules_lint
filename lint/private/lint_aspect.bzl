@@ -129,6 +129,28 @@ def output_files(mnemonic, target, ctx, sibling = None, files_to_lint = None):
     )
 
 def patch_file(mnemonic, target, ctx, sibling = None, files_to_lint = None):
+    """Declare and return patch output(s) for a linter.
+
+    If `files_to_lint` is None, declare a single patch file for the `target`
+    and return it together with an OutputGroupInfo containing that patch. If
+    `files_to_lint` is provided, declare one patch file per input file and
+    return the list of patches with an OutputGroupInfo that contains them.
+
+    Args:
+      mnemonic: mnemonic identifier used in output filenames.
+      target: the target being visited by the linter aspect.
+      ctx: the aspect or rule context used to declare outputs.
+      sibling: optional File to declare outputs next to (places them in the same
+        directory as the sibling).
+      files_to_lint: optional list of files to lint; if provided, a patch file
+        will be declared for each input file.
+
+    Returns:
+      When `files_to_lint` is None, returns a tuple ``(patch, OutputGroupInfo)``
+      where `patch` is a single declared File. When `files_to_lint` is
+      provided, returns ``(list_of_patches, OutputGroupInfo)``.
+    """
+
     if files_to_lint == None:
         patch = ctx.actions.declare_file(OUTFILE_FORMAT.format(label = target.label.name, mnemonic = mnemonic, suffix = "patch"), sibling = sibling)
         return patch, OutputGroupInfo(rules_lint_patch = depset([patch]))
@@ -169,16 +191,36 @@ def patch_and_output_files(mnemonic, target, ctx, sibling = None, files_to_lint 
         )
         for o, p in zip(outputs, patch)
     ], OutputGroupInfo(
-            rules_lint_human = depset(human_outputs),
-            rules_lint_machine = depset(machine_outputs),
-            rules_lint_patch = depset(patch),
-        )
+        rules_lint_human = depset(human_outputs),
+        rules_lint_machine = depset(machine_outputs),
+        rules_lint_patch = depset(patch),
+    )
 
-def filter_srcs(rule):
+def filter_srcs(rule, include_pyi = False):
+    """Return the list of source files to lint for `rule`.
+
+    Includes `pyi_srcs` when `include_pyi` is True and the attribute exists.
+    If the rule has the "lint-genfiles" tag, return all declared srcs;
+    otherwise return only source files that are actual workspace sources from
+    the main workspace (empty workspace_name).
+
+    Args:
+      rule: the rule to extract source files from.
+      include_pyi: if True and the rule has a `pyi_srcs` attribute, include
+        those files as well.
+
+    Returns:
+      A list of File objects representing source files to be linted.
+    """
+
+    srcs = list(rule.files.srcs)
+    if include_pyi and hasattr(rule.files, "pyi_srcs"):
+        srcs.extend(rule.files.pyi_srcs)
+
     if "lint-genfiles" in rule.attr.tags:
-        return rule.files.srcs
+        return srcs
     else:
-        return [s for s in rule.files.srcs if s.is_source and s.owner.workspace_name == ""]
+        return [s for s in srcs if s.is_source and s.owner.workspace_name == ""]
 
 def noop_lint_action(ctx, outputs):
     """Action that creates expected outputs when no files are provided to a lint action.

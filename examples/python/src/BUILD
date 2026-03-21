@@ -26,14 +26,40 @@ py_library(
 )
 
 py_library(
+    name = "uses_pyi_dependency",
+    srcs = ["uses_pyi_dependency.py"],
+    pyi_deps = [":pyi_dependency"],
+)
+
+py_library(
+    name = "missing_pyi_dependency",
+    srcs = ["uses_pyi_dependency.py"],
+)
+
+py_library(
     name = "uses_eval",
     srcs = ["uses_eval.py"],
+)
+
+py_library(
+    name = "uses_eval_stub",
+    pyi_srcs = ["uses_eval.pyi"],
 )
 
 filegroup(
     name = "unused_import_pyi",
     srcs = ["unused_import.pyi"],
     tags = ["python"],
+)
+
+py_library(
+    name = "unused_import_stub",
+    pyi_srcs = ["unused_import.pyi"],
+)
+
+py_library(
+    name = "pyi_dependency",
+    pyi_srcs = ["//src/python_lib:dependency.pyi"],
 )
 
 filegroup(
@@ -44,5 +70,6 @@ filegroup(
         ":unused_import",
         ":uses_dependency",
         ":uses_eval",
+        ":uses_pyi_dependency",
     ],
 )

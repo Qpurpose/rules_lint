@@ -20,6 +20,19 @@ load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OPTIONAL_SARIF_PARSER
 
 _MNEMONIC = "AspectRulesLintTy"
 
+def _collect_py_info(targets, workspace_name, transitive_sources, import_paths):
+    for dep in targets:
+        if PyInfo not in dep:
+            continue
+
+        transitive_sources.append(dep[PyInfo].transitive_sources)
+        transitive_sources.append(dep[PyInfo].transitive_pyi_files)
+
+        for import_path in dep[PyInfo].imports.to_list():
+            if import_path == workspace_name:
+                continue
+            import_paths["external/" + import_path] = True
+
 def ty_action(ctx, executable, srcs, transitive_srcs, config, stdout, exit_code = None, env = {}, extra_search_paths = [], color = True):
     """Run ty as an action under Bazel.
 
@@ -152,27 +165,20 @@ def _ty_aspect_impl(target, ctx):
 
     # Collect from deps attribute using PyInfo
     if hasattr(ctx.rule.attr, "deps"):
-        for dep in ctx.rule.attr.deps:
-            if PyInfo in dep:
-                transitive_sources.append(dep[PyInfo].transitive_sources)
-                transitive_sources.append(dep[PyInfo].transitive_pyi_files)
-                # Collect imports from pip packages for extra search paths
-                for import_path in dep[PyInfo].imports.to_list():
-                    if import_path == ctx.workspace_name:
-                        continue
-                    import_paths["external/" + import_path] = True
+        _collect_py_info(ctx.rule.attr.deps, ctx.workspace_name, transitive_sources, import_paths)
+
+    if hasattr(ctx.rule.attr, "pyi_deps"):
+        _collect_py_info(ctx.rule.attr.pyi_deps, ctx.workspace_name, transitive_sources, import_paths)
 
     # When srcs contain labels to other targets (e.g., genrules that produce .py files),
     # we need to collect their transitive sources for proper type resolution
     if hasattr(ctx.rule.attr, "srcs"):
-        for src in ctx.rule.attr.srcs:
-            if PyInfo in src:
-                transitive_sources.append(src[PyInfo].transitive_sources)
-                transitive_sources.append(src[PyInfo].transitive_pyi_files)
-                for import_path in src[PyInfo].imports.to_list():
-                    import_paths["external/" + import_path] = True
+        _collect_py_info(ctx.rule.attr.srcs, ctx.workspace_name, transitive_sources, import_paths)
 
-    files_to_lint = filter_srcs(ctx.rule)
+    if hasattr(ctx.rule.attr, "pyi_srcs"):
+        _collect_py_info(ctx.rule.attr.pyi_srcs, ctx.workspace_name, transitive_sources, import_paths)
+
+    files_to_lint = filter_srcs(ctx.rule, include_pyi = True)
     outputs, info = output_files(_MNEMONIC, target, ctx)
 
     if len(files_to_lint) == 0:
@@ -209,7 +215,7 @@ def lint_ty_aspect(binary, config, rule_kinds = ["py_binary", "py_library", "py_
         implementation = _ty_aspect_impl,
         # Propagate the aspect to dependencies so they are also linted.
         # Transitive sources for type resolution are obtained via PyInfo provider.
-        attr_aspects = ["deps"],
+        attr_aspects = ["deps", "pyi_deps"],
         attrs = {
             "_options": attr.label(
                 default = "//lint:options",

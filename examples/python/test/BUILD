@@ -82,21 +82,50 @@ bandit_test(
     expected_exit_code = 1,
 )
 
+bandit_test(
+    name = "bandit_should_fail_pyi_srcs",
+    srcs = ["//src:uses_eval_stub"],
+    expected_exit_code = 1,
+)
+
 flake8_test(
     name = "flake8",
     srcs = ["//src:unused_import"],
     expected_exit_code = 1,
 )
 
+flake8_test(
+    name = "flake8_should_fail_pyi_srcs",
+    srcs = ["//src:unused_import_stub"],
+    expected_exit_code = 1,
+)
+
 pylint_test(
     name = "pylint",
     srcs = ["//src:unused_import"],
-    expected_exit_code = 1,
+    expected_exit_code = 20,
+)
+
+pylint_test(
+    name = "pylint_should_fail_pyi_srcs",
+    srcs = ["//src:unused_import_stub"],
+    expected_exit_code = 4,
 )
 
 ty_test(
     name = "ty_should_fail_unsupported_operator",
     srcs = ["//src:unsupported_operator"],
+    expected_exit_code = 1,
+)
+
+ty_test(
+    name = "ty_should_accept_pyi_deps",
+    srcs = ["//src:uses_pyi_dependency"],
+)
+
+ty_test(
+    name = "ty_should_fail_without_pyi_deps",
+    srcs = ["//src:missing_pyi_dependency"],
     expected_exit_code = 1,
 )
 
@@ -126,7 +155,7 @@ report_test(
 
 machine_ruff_report(
     name = "machine_ruff_pyi_report",
-    src = "//src:unused_import_pyi",
+    src = "//src:unused_import_stub",
 )
 
 report_test(

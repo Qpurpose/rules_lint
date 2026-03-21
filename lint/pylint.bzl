@@ -85,7 +85,7 @@ def _pylint_aspect_impl(target, ctx):
         return []
 
     outputs, info = output_files(_MNEMONIC, target, ctx)
-    files_to_lint = filter_srcs(ctx.rule)
+    files_to_lint = filter_srcs(ctx.rule, include_pyi = True)
 
     if len(files_to_lint) == 0:
         noop_lint_action(ctx, outputs)
