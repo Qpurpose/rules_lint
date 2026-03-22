@@ -287,6 +287,7 @@ bzl_library(
         ":vale_library",
         ":vale_versions",
         "//lint/private:lint_aspect",
+        "@bazel_skylib//lib:dicts",
     ],
 )
 
