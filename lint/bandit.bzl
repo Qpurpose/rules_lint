@@ -31,7 +31,7 @@ bandit = lint_bandit_aspect(
 ```
 """
 
-load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "OUTFILE_FORMAT", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
+load("//lint/private:lint_aspect.bzl", "LintOptionsInfo", "filter_srcs", "noop_lint_action", "output_files", "should_visit")
 
 _MNEMONIC = "AspectRulesLintBandit"
 
@@ -97,7 +97,7 @@ def _bandit_aspect_impl(target, ctx):
         return []
 
     outputs, info = output_files(_MNEMONIC, target, ctx)
-    files_to_lint = filter_srcs(ctx.rule)
+    files_to_lint = filter_srcs(ctx.rule, include_pyi = True)
 
     if len(files_to_lint) == 0:
         noop_lint_action(ctx, outputs)
