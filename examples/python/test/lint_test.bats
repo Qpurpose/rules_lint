@@ -36,6 +36,9 @@ EOF
 
 	# Flake8
 	assert_output --partial "src/unused_import.py:18:1: F401 'os' imported but unused"
+
+	# pyi_srcs are included too
+	assert_output --partial "src/unused_import.pyi:1:0: W0611: Unused import os (unused-import)"
 }
 
 @test "should produce reports" {

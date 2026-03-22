@@ -130,7 +130,7 @@ def _ruff_aspect_impl(target, ctx):
     if not should_visit(ctx.rule, ctx.attr._rule_kinds, ctx.attr._filegroup_tags):
         return []
 
-    files_to_lint = filter_srcs(ctx.rule)
+    files_to_lint = filter_srcs(ctx.rule, include_pyi = True)
     if ctx.attr._options[LintOptionsInfo].fix:
         outputs, info = patch_and_output_files(_MNEMONIC, target, ctx)
     else:
